@@ -1,0 +1,162 @@
+syntax = "proto3";
+package platformserver;
+option java_multiple_files = true;
+option java_package = "com.szwdcloud.platformserver.proto.platformserver";
+option java_outer_classname = "ServerRoleServiceProto";
+import "./cc.proto";
+import public "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+/////////////////
+//2019-08-08 jiayb add about UserRelaRole
+//2019-09-04 jiayb add roleCategory
+////////////
+service ServerRoleService {
+    //保存角色
+    rpc save(RoleSaveRequest) returns (Response);
+    //更新角色
+    rpc update(RoleUpdateRequest)returns(Response);
+    //删除角色
+    rpc delete(RoleDeleteRequest)returns(Response);
+
+    //查询角色类型查询对应的所有的角色
+    rpc findAllRoles(FindAllRolesRequest)returns(Response);
+
+    rpc queryRoles(RolesQueryRequest)returns(Response);
+    //查询用户关联角色 内部封装UserRelaRoleQueryResult
+    rpc queryUserRelaRoles(UserRelaRoleQueryRequest)returns(Response);
+    //FindOneRoleResult
+    rpc findOne(google.protobuf.StringValue)returns(Response);
+}
+
+///////////////////////////////request message////////////////////////////////////
+//保存请求
+message RoleSaveRequest{
+   //角色名称 必传
+   string name = 1;
+   //角色类型  必传    平台角色：1,客户角色：2,用户角色：3
+   int32 type = 2;
+   //绑定权限ID
+   repeated string privilegeId = 3;
+   //角色类别:1.系统角色 2.自定义角色 必传
+   int32 roleCategory = 4;
+}
+
+///////////////////////////////request message////////////////////////////////////
+//更新用户请求
+message RoleUpdateRequest{
+    //必传  角色ID
+    int32 id = 1;
+    //角色类型  必传    平台角色：1,客户角色：2,用户角色：3
+    int32 type = 2;
+    //权限名称
+    string name = 3;
+    //绑定权限ID
+    repeated string privilegeId = 4;
+    //角色类别:1.系统角色 2.自定义角色 必传
+    int32 roleCategory = 5;
+}
+
+///////////////////////////////request message////////////////////////////////////
+//删除用户请求
+message RoleDeleteRequest{
+    //角色ID 必传
+    string id = 1;
+
+}
+
+//暂时还没有写
+message RoleSearchRequest{
+    string id = 1;
+    string name = 2;
+    int32 type = 3;
+}
+
+message FindAllRolesRequest{
+    //角色类型 非必须（但是要单纯获得某种类型的角色，需要传） 平台角色：1,客户角色：2,用户角色：3
+    int32 type = 1;
+    //角色类别:1.系统角色 2.自定义角色 暂不支持
+    int32 roleCategory = 2;
+    //客户类型，选填，不传则按上述条件默认查询
+    int32 customerType = 3;
+}
+
+message FindAllRolesResult{
+    message Role{
+        int32 id = 1;
+        string name = 2;
+        int32 type = 3;
+        //角色类别:1.系统角色 2.自定义角色 非必须
+        int32 roleCategory = 6;
+        google.protobuf.Timestamp createTime = 4;
+        google.protobuf.Timestamp updateTime = 5;
+    }
+    repeated Role role = 1;
+}
+
+message RolesQueryRequest{
+    //角色ID
+    int32 roleId = 1;
+    //权限ID
+    string privilegeId = 2;
+    //角色类型
+    int32 type = 3;
+    int32 pageNo = 4;        //  页码   从1开始
+    int32 pageSize = 5;      //  每页大小
+    //角色类别:1.系统角色 2.自定义角色 暂不支持
+    int32 roleCategory = 6;
+}
+message RoleQueryResult{
+    message Role{
+        int32 id = 1;
+        string name = 2;
+        int32 systemId = 6;
+        google.protobuf.Timestamp createTime = 3;
+        repeated string privilegeName = 4;
+        repeated string privilegeId = 5;
+        //角色类别:1.系统角色 2.自定义角色 非必须
+        int32 roleCategory = 7;
+    }
+   repeated Role role = 1;
+    int64 total = 2;    //  总数量
+    int32 pages = 3;    //  总页数
+    int32 pageNo = 4;   //  页码
+    int32 pageSize = 5; //  每页大小
+}
+message UserRelaRole{
+    string id = 1;
+    //用户ID
+    string userId = 2;
+    //角色ID
+    int32 roleId = 3;
+    //客户ID
+    int64 customerId = 4;
+    //数据状态
+    int32 dataStatus = 5;
+}
+message UserRelaRoleQueryRequest{
+    //用户ID
+    repeated string userId = 1;
+    //角色ID
+    int32 roleId = 2;
+    //客户ID
+    repeated int64 customerId = 3;
+}
+message UserRelaRoleQueryResult{
+   repeated UserRelaRole userRelaRole = 1;
+}
+message FindOneRoleResult{
+    int64 id = 1;
+    int32 type = 2;
+    string name = 3;
+    int32 roleCategory = 5;
+    message Privilege{
+        string code = 2;
+        string name = 3;
+        int32 type = 4;
+        string url = 5;
+        string parentId = 6;
+    }
+    repeated Privilege privilege = 4;
+
+
+}

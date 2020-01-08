@@ -1,0 +1,129 @@
+syntax = "proto3";
+package wdcloudpayment;
+option java_multiple_files = true;
+option java_package = "com.wdcloud.payment.proto.CommodityInfo";
+option java_outer_classname = "CommodityInfoServiceProto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
+
+
+service CommodityInfoService {
+    //选购商品-商品信息
+    rpc getCommodityInfoList(google.protobuf.Empty) returns(RespCommodityInfoList);
+    //新增商品
+    rpc saveCommodityInfo(CommodityInfoVo)returns(Response);
+    //修改商品
+    rpc updateCommodityInfo(CommodityInfoVo)returns(Response);
+    //删除商品
+    rpc deleteCommodityInfo(RequestId)returns(Response);
+    //分页查询商品列表
+    rpc getAllCommodityInfoList(RequestPageAllCommodityInfoList)returns(ResponsePageAllCommodityInfoList);
+    //发布商品
+    rpc releaseCommodity(RequestReleaseCommodity)returns(Response);
+}
+
+//商品信息
+message CommodityInfoVo{
+    int32 id = 1;
+    string commodityName = 2;//商品名称
+    string commodityComment = 3;//商品描述
+    int32 originalPrice = 4;//原价格
+    int32 sellingPrice = 5;//销售价格
+    int32 status = 6;//状态 0-未发布 1-已发布 2-下架
+    int32 effectiveTime = 7;//开通时长
+}
+///////////////////////////////request message////////////////////////////////////
+//  条件查询商品
+message RequestPageAllCommodityInfoList {
+    int32 page = 1;        //  页码   从1开始
+    int32 pageSize = 2;      //  每页大小
+}
+
+message RequestId {
+    int32 id = 1;
+}
+
+message RequestReleaseCommodity {
+    int32 id = 1;
+}
+
+///////////////////////////////response message////////////////////////////////////
+message RespCommodityInfoList{
+    string code = 1;
+    string msg = 2;
+    repeated CommodityInfoVo data = 3;
+}
+
+//  返回根据条件查询商品
+message ResponsePageAllCommodityInfoList {
+    //操作标识（0成功 1失败）
+    string code = 1;
+    //操作结果
+    string msg = 2;
+    int64 totalRecords = 3;    //  总数量
+    int64 totalPage = 4;    //  总页数
+    int64 page = 5;   //  页码
+    int64 pageSize = 6; //  每页大小
+    repeated CommodityInfoVo datas = 7;
+}
+
+//////////////////////////const////////////////////////////////
+//操作标识
+enum ReturnCode {
+    SYS_OK =  0; //0,操作成功;
+    SYS_ERR_EXCEPTION = 999; //999,操作失败(未知异常
+    SYS_ERR_NOAUTH = 1;//1,您没有该项操作的权利;
+    SYS_ERR_TOKENINVALID = 2; //2,TOKEN信息已失效
+    SYS_ERR_PARAMERROR = 3; //3,参数错误
+    SYS_ERR_RPCSERVICEERROR = 4;  //RPC服务器异常
+    SYS_ERR_UPLOADAUDIO = 5;  //音频上传失败
+    SYS_ERR_UPLOADFILE = 6;   //文件上传失败
+    SYS_ERR_NOAUDIOFILE = 7;  //未发现音频文件
+    SYS_ERR_NOIMAGEFILE = 8;  //未发现图片文件
+    SYS_ERR_BUSINESSEXCEPTION = 9; //业务异常统一代号
+}
+
+//分页封装数据
+message BatchDataPage {
+    /** 当前页 */
+    int32 page = 1;
+    /** 分页数 */
+    int32 pagesize = 2;
+    /** 开始行*/
+    int32 offset = 3;
+    /**总记录数*/
+    float totalRecords = 4;
+    /** 具体数据 */
+    google.protobuf.Any rows = 5; // 任何对象
+}
+
+//分页请求数据
+message DataPageRequestParam {
+    /** 当前页 */
+    int32 page = 1;
+    /** 分页数 */
+    int32 pagesize = 2;
+}
+
+///////////////////////////////response message////////////////////////////////////
+//响应
+message Response{
+    //状态码
+    string code = 1;
+    //返回提示信息
+    string msg = 2;
+    //返回的业务数据
+    string datas = 3;
+}
+
+//更新删除结果数返回值
+message CountResult{
+    int32 count = 1;
+}
+
+//异常信息值
+message ExceptionResult {
+    string exMsg = 1;
+}
+

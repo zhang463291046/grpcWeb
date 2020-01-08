@@ -1,0 +1,457 @@
+syntax = "proto3";
+package wdcloudgrowthconversion;
+option java_multiple_files = true;
+option java_package = "com.szwdcloud.wdcloudgrowthconversion.proto.wdcloudgrowthconversion";
+option java_outer_classname = "ConversionServiceProto";
+import "google/protobuf/empty.proto";
+//U币兑换服务
+service ConversionService {
+    //获取支出信息
+    rpc getExpenseInfo(RequestGetExpenseInfo)returns(ResponseGetExpenseInfo);
+    //获取支出数量，用于柱状图统计
+    rpc getExpenseCount(RequestGetExpenseCount)returns(ResponseGetExpenseCount);
+
+    //*************************提现商品相关
+    //app根据指定条件查询提现商品列表
+    rpc appListWithdrawByCondition(RequestListWithdrawByCondition)returns(WithdrawAppBatchDataPage) {}
+
+    //根据指定条件查询提现商品列表
+    rpc listWithdrawByCondition(RequestListWithdrawByCondition)returns(WithdrawBatchDataPage) {}
+    //初始化提交提现商品信息
+    rpc initSaveWithdraw(google.protobuf.Empty)returns(ResponseInitSaveWithdraw);
+    //提交提现商品信息
+    rpc saveWithdraw(RequestSaveWithdraw)returns(Response);
+    //更新提现商品信息
+    rpc updateWithdraw(RequestUpdateWithdraw)returns(Response);
+
+    //**************************申请相关
+    //app根据指定条件查询申请列表
+    rpc appListConversionInfoByCondition(RequestListConversionInfoByCondition)returns(ConversionAppBatchDataPage) {}
+
+    //根据指定条件导出申请列表
+    rpc exportConversionInfoByCondition(RequestListConversionInfoByCondition)returns(ExportConversionBatchData) {}
+    //根据指定条件查询用户U币记录列表
+    rpc listCurrencyInfoByCondition(RequestListCurrencyInfoByCondition)returns(CurrencyInfoBatchDataPage) {}
+    //根据指定条件查询申请列表
+    rpc listConversionInfoByCondition(RequestListConversionInfoByCondition)returns(ConversionBatchDataPage) {}
+    //提交申请信息
+    rpc saveConversionInfo(RequestSaveConversionInfo)returns(Response);
+    //更新申请信息
+    rpc updateConversionInfo(RequestUpdateConversionInfo)returns(Response);
+}
+/////////////////////////////////////////base////
+//提现商品信息详情
+message WithdrawView{
+    int32 id = 1;//提现商品编号
+    string withdrawNo = 2;//提现单号',
+    int32 amountId = 3;//'提现金额id',
+    string amountIdName = 4 ;//提现金额名称',
+    string goodsName = 5;//商品名称',
+    int32 withdrawUCoin = 6;//单次兑换所需U币',
+    int32 goodsTotal = 7;//商品总数',
+    string goodsLogo = 8;//商品封面',
+    int32 starLimit = 9;//限制几星用户兑换id',
+    string starLimitName = 10;//限制几星用户兑换名称',
+    int32 dateLimit = 11;//限制特殊日期兑换',
+    int32 timesLimit = 12;//限制用户兑换次数id',
+    string timesLimitName = 13;//限制用户兑换次数名称',
+    int32 dataStatus = 14;//1:正常，2：冻结，3：删除',
+    string creater = 15;//创建人',
+    string createTime = 16;//创建时间',
+    string updateTime = 17;//更新时间',
+    string soldoutTime = 18;//下架时间',
+    string comment = 19;//备注',
+    int32 withdrawInventoryTotal = 20;//提现商品剩余库存
+    string goodsStateName = 21;//商品状态,
+    int32 soldTotal = 22;//兑换人次
+    string errorInfo = 23;//错误信息,
+}
+
+//提现商品信息App详情----未启用
+message WithdrawAppView{
+    int32 id = 1;//提现商品编号
+    string withdrawNo = 2;//提现单号',
+    int32 amountId = 3;//'提现金额id',
+    string amountIdName = 4 ;//提现金额名称',
+    string goodsName = 5;//商品名称',
+    int32 withdrawUCoin = 6;//单次兑换所需U币',
+    int32 goodsTotal = 7;//商品总数',
+    string goodsLogo = 8;//商品封面',
+    string starLimitName = 9;//限制几星用户兑换名称',
+    string dateLimitName = 10;//限制特殊日期兑换',
+    string timesLimitName = 11;//限制用户兑换次数名称',
+    int32 dataStatus = 12;//1:正常，2：冻结，3：删除',
+    string createTime = 13;//创建时间',
+    string updateTime = 14;//更新时间',
+    string soldoutTime = 15;//下架时间',
+    string comment = 16;//备注',
+    int32 withdrawInventoryTotal = 17;//提现商品剩余库存
+    string goodsStateName = 18;//商品状态,
+    string errorInfo = 19;//错误信息,
+}
+
+//提现商品信息
+//新增时根据页面要求输入；更新时withdrawNo、dataStatus必填
+message Withdraw{
+    int32 amountId = 1;//'提现金额id',
+    string goodsName = 2;//商品名称',
+    int32 withdrawUCoin = 3;//单次兑换所需U币',
+    int32 goodsTotal = 4;//商品总数',
+    string goodsLogo = 5;//商品封面',
+    int32 starLimit = 6;//限制几星用户兑换id',
+    int32 dateLimit = 7;//限制特殊日期兑换',
+    string creater = 8;//创建人',
+    string createTime = 9;//创建时间',
+    string updateTime = 10;//更新时间',
+    string comment = 11;//备注',
+    string withdrawNo = 12;//提现单号',
+    int32 dataStatus = 13;//1:正常，2：冻结，3：删除', 下架时传2
+}
+
+//提现商品信息详情
+message WithdrawBatchData{
+    int32 soldOnGoodsTotal = 1;//已上架商品数量
+    repeated WithdrawView withdrawView = 2; //
+}
+
+//app提现商品信息详情
+message WithdrawAppBatchData{
+    int32 conversionNum = 1;//可提现数量
+    int32 remainWithdrawNum = 2;//剩余提现数量
+    string withdrawDesc = 3;//提现描述
+    repeated WithdrawView withdrawView = 4; //
+}
+
+//申请信息详情
+message ConversionInfoView{
+    string id = 1;//申请id
+    string appUserId = 2;//目前指用户id
+    string userName = 3;//用户名称
+    string createTime = 4;//申请时间
+    string updateTime = 5;//更新时间
+    int32 applyAmount = 6;//申请金额,
+    repeated UserBankInfo userBankInfo = 7;//银行信息
+    int32 deductUCoin = 8;//扣除U币,
+    int32 registeredDays = 9;//注册至今,
+    string registeredDaysName = 10;//注册至今
+    int64 schoolId = 11;//所属学校id
+    string schoolName = 12;//学校名称
+    int32 operateState = 13;//状态
+    string operateStateName = 14;//状态名称
+    string comment = 15;//备注
+    string confirmTime = 16;//确认时间',
+    string finalTime = 17;//最终操作时间',
+    string userMobile = 18;//用户手机号
+    string billsUrl = 19;//账单单据图片
+}
+
+//批量申请信息详情
+message ConversionBatchData{
+    int32 pendingApply = 1;//待处理申请
+    int32 pendingAmount = 2;//待处理申请金额
+    int32 currentSearchAmount = 3;//当前筛选条件总金额
+    repeated ConversionInfoView conversionInfoView = 4; //
+}
+
+//申请信息，新增时，除时间、状态、id外，其他必填
+message ConversionInfo{
+    string appUserId = 1;//目前指用户id
+    string withdrawNo = 2;//提现单号
+    UserBankInfo userBankInfo = 3;//银行信息
+    int64 schoolId = 4;//所属学校id
+    string comment = 5;//备注
+    int32 userStarLevel = 6;//用户当前星级
+    string createTime = 9;//创建时间',
+    string updateTime = 10;//更新时间',
+    string confirmTime = 11;//确认时间',
+    string finalTime = 12;//最终操作时间',
+    string verifiCode = 13;//验证码
+    string id = 14;//申请id
+    int32 operateState = 15;//操作状态,0待处理 1已同意 2已拒绝 3转账成功 4转账失败',
+    string billsUrl = 16;//账单单据图片
+}
+
+//任务记录信息
+message UserTaskLogInfo{
+    string id =1;
+    string userId =2;
+    string schoolId =3;
+    string teacherId =4;
+    int32 taskId =5;//任务id
+    string taskContent =6;//任务内容
+    string commonId =7;
+    int32 originalCurrency=8;//原先U币
+    int32 originalExp =9;//原先经验值
+    int32 obtainExp =10;//完成任务获得经验
+    int32 obtainCurrency=11;//完成任务获得U币
+    string completeTime =12;//完成时间
+    string createTime =13;//创建时间
+    int32 recordType =14;//记录类型
+    string recordComment =15;//任务记录描述
+}
+
+//返回批量任务记录信息详情
+message CurrencyInfoBatchData{
+    string appUserId = 1;//目前指用户id
+    string userMobile = 2;//用户手机号
+    string userName = 3;//用户名称
+    int32 totalCurrency = 4;//用户剩余总U币
+    repeated UserTaskLogInfo userTaskLogInfo = 5; //
+}
+
+//银行信息
+message UserBankInfo{
+    string appUserId = 1;//目前指用户id
+    string bankName = 2;//开户行
+    string userName = 3;//开户名
+    string bankCardId = 4;//卡号
+}
+
+//通用配置信息
+message CommonConfigInfo{
+    int32 typeId = 1;//id
+    string typeName = 2;//
+    string a = 3;//
+}
+//提现商品初始化信息
+message InitSaveWithdraw{
+    repeated CommonConfigInfo applyAmount = 1;//申请金额列表
+    repeated CommonConfigInfo starLimit = 2;//几星列表
+}
+/////////////////////////////////////request//////////////////////////////
+//获取商品列表；除page和pageSize外，其他选填
+message RequestListWithdrawByCondition{
+    int32 page = 1;        //  页码   从1开始
+    int32 pageSize = 2;      //  每页大小
+    string goodsName = 3;//商品名称
+    string startTime = 4;//开始时间
+    string endTime = 5;//结束时间
+    int32 goodsState = 6;//状态
+    string appUserId = 7;//用户id
+    int32 userStarLevel = 8;//用户星级
+}
+//----未启用
+message RequestInitSaveWithdraw{
+}
+message RequestSaveWithdraw{
+    Withdraw withdraw = 1;//提现商品信息
+}
+message RequestUpdateWithdraw{
+    Withdraw withdraw = 1;//提现商品信息
+}
+//获取用户申请记录；除page、pageSiz外，其他选填;网页查询和导出，不传appUserId，其他情况必填
+message RequestListConversionInfoByCondition{
+    int32 page = 1;        //  页码   从1开始
+    int32 pageSize = 2;      //  每页大小
+    string userName = 3;//用户名称
+    string startTime = 4;//开始时间
+    string endTime = 5;//结束时间
+    int32 operateState = 6;//状态
+    string appUserId = 7;//目前指用户id
+    int32 requestCategory = 8;//请求类别0提现申请请求 1兑换设置请求
+}
+//获取用户U币记录；
+message RequestListCurrencyInfoByCondition{
+    int32 page = 1;        //  页码   从1开始
+    int32 pageSize = 2;      //  每页大小
+    string startTime = 3;//开始时间
+    string endTime = 4;//结束时间
+    string appUserId = 5;//目前指用户id 必填
+    int64 schoolId = 6;//用户学校 必填
+    string withdrawNo = 7;//提现商品单号
+    string conversionInfoNo = 8;//申请单号
+}
+//保存用户申请
+message RequestSaveConversionInfo{
+    ConversionInfo conversionInfo = 1;//申请信息
+ }
+//更新用户申请
+message RequestUpdateConversionInfo{
+     ConversionInfo conversionInfo = 1;//申请信息
+}
+///////////////app//
+//所有必填
+message RequestGetExpenseInfo{
+    string appUserId = 1;//目前指用户id
+    string startTime = 2;//开始时间
+    string endTime = 3;//结束时间
+}
+//所有必填
+message RequestGetExpenseCount{
+    string appUserId = 1;//目前指用户id
+    string startTime = 2;//开始时间
+    string endTime = 3;//结束时间
+}
+///////////////////////////////////////response////////////////////////////
+///////////////app//
+message ResponseGetExpenseInfo{
+    //状态码
+    string code = 1;
+    string currentTime = 2;
+    //返回提示信息
+    string message = 3;
+    message Data{
+        string createTime = 1;//完成时间
+        string content = 2;//任务具体描述
+        int32 deductCurrency = 3;//任务扣除的总U币
+        int32 deduct = 4;//单次任务扣除U币
+        int32 withdrawNum = 5;//提现次数
+        string week = 6;//周数
+        string completeTime = 7;//完成时间
+    }
+    repeated Data data = 4;
+}
+message ResponseGetExpenseCount{
+    //状态码
+    string code = 1;
+    string currentTime = 2;
+    //返回提示信息
+    string message = 3;
+    message Data{
+        string week = 1;//周数
+        int32 deductCurrency = 2;//任务扣除总U币
+    }
+    repeated Data data = 4;
+}
+////////////////
+message ResponseInitSaveWithdraw{
+    //状态码
+    string code = 1;
+    string currentTime = 2;
+    //返回提示信息
+    string message = 3;
+    message Data{
+        InitSaveWithdraw initSaveWithdraw = 1;
+    }
+    Data data = 4;
+}
+//根据条件返回全部申请数据
+message ExportConversionBatchData {
+    //操作标识（0000成功 9999失败）
+    string code = 1;
+    string currentTime = 2;
+    //操作结果
+    string message = 3;//
+    //响应的数据
+    message Data{
+        /** 具体数据 */
+        bytes fileBytes =1;
+    }
+    Data data = 4;
+}
+//分页封装数据
+message WithdrawAppBatchDataPage {
+    //操作标识（0000成功 9999失败）
+    string code = 1;
+    string currentTime = 2;
+    //操作结果
+    string message = 3;
+    //响应的数据
+    message Data{
+        int32 page = 1;
+        //每页数量
+        int32 pageSize = 2;
+        //总页数
+        int32 totalPage = 3;
+        //总记录数
+        int64 totalRecords = 4;
+        /** 具体数据 */
+        WithdrawAppBatchData row = 5; //
+    }
+    Data data = 4;
+}
+
+//分页封装数据
+message WithdrawBatchDataPage {
+    //操作标识（0000成功 9999失败）
+    string code = 1;
+    string currentTime = 2;
+    //操作结果
+    string message = 3;
+    //响应的数据
+    message Data{
+        int32 page = 1;
+        //每页数量
+        int32 pageSize = 2;
+        //总页数
+        int32 totalPage = 3;
+        //总记录数
+        int64 totalRecords = 4;
+        /** 具体数据 */
+        WithdrawBatchData row = 5; //
+    }
+    Data data = 4;
+}
+//分页封装数据
+message CurrencyInfoBatchDataPage {
+    //操作标识（0000成功 9999失败）
+    string code = 1;
+    string currentTime = 2;
+    //操作结果
+    string message = 3;//当前页
+    //响应的数据
+    message Data{
+        int32 page = 1;
+        //每页数量
+        int32 pageSize = 2;
+        //总页数
+        int32 totalPage = 3;
+        //总记录数
+        int64 totalRecords = 4;
+        /** 具体数据 */
+        CurrencyInfoBatchData row = 5; //
+    }
+    Data data = 4;
+}
+//分页封装数据
+message ConversionBatchDataPage {
+    //操作标识（0000成功 9999失败）
+    string code = 1;
+    string currentTime = 2;
+    //操作结果
+    string message = 3;//当前页
+    //响应的数据
+    message Data{
+        int32 page = 1;
+        //每页数量
+        int32 pageSize = 2;
+        //总页数
+        int32 totalPage = 3;
+        //总记录数
+        int64 totalRecords = 4;
+        /** 具体数据 */
+        ConversionBatchData row = 5; //
+    }
+    Data data = 4;
+}
+//分页封装数据
+message ConversionAppBatchDataPage {
+    //操作标识（0000成功 9999失败）
+    string code = 1;
+    string currentTime = 2;
+    //操作结果
+    string message = 3;//当前页
+    //响应的数据
+    message Data{
+        int32 page = 1;
+        //每页数量
+        int32 pageSize = 2;
+        //总页数
+        int32 totalPage = 3;
+        //总记录数
+        int64 totalRecords = 4;
+        /** 具体数据 */
+        repeated ConversionInfoView row = 5; //
+    }
+    Data data = 4;
+}
+//响应
+message Response{
+    //状态码
+    string code = 1;
+    string currentTime = 2;
+    //返回提示信息
+    string message = 3;
+    //返回的补充信息
+    string data = 4;
+}

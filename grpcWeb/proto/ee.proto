@@ -1,0 +1,194 @@
+//指定proto3格式
+syntax = "proto3";
+package resourcecenterstatistic;
+option java_multiple_files = true; // 以外部类模式生成
+option java_package = "com.szwdcloud.datacenter"; // 编译后生成的包名
+option java_outer_classname = "RSDataCenterProto"; // 最外层类名称
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
+
+service RSDataCenterStatisticService {
+
+    //获取客户中心数据
+    rpc getCustomerStatisticData (CustomerStatisticReq) returns (CustomerStatisticResp) {}
+    rpc getCustomerStatisticDataByUser (CustomerStatisticReq) returns (CustomerStatisticResp) {}
+
+    //获取教师访问概览
+    rpc getTeacherAccessOverview (google.protobuf.Int64Value) returns (TeacherAccessOverviewResp) {}//兼容用户中心
+    rpc getTeacherAccessOverviewV2 (TeacherAccessOverviewReq) returns (TeacherAccessOverviewResp) {}
+
+    //获取教师访问概览（折线图）
+    rpc getTeacherAccessTrend (TeacherAccessTrendReq) returns (TeacherAccessTrendResp) {}
+
+    //获取教师访问概览（表格）
+    rpc getTeacherAccessTrendData (google.protobuf.Int64Value) returns (TeacherAccessTrendDataResp) {}
+    rpc getTeacherAccessTrendDataV2 (TeacherAccessOverviewReq) returns (TeacherAccessTrendDataResp) {}
+
+    //获取用户行为趋势
+    rpc getUserBehaviorTrend (UserBehaviorTrendReq) returns (UserBehaviorTrendResp) {}
+
+    //获取用户事件点击数
+    rpc getUserClickTimes (UserClickTimesReq) returns (UserClickTimesResp) {}
+}
+
+message CustomerStatisticReq {
+    string startDate = 1; //开始日期
+    string endDate = 2; //结束日期
+    int32 areaId = 3; //地区id
+    int64 customerId = 4; //客户id
+    int32 customerType = 5;//客户类型 1-学校 2-教育局 3-代理商
+    int32 statisticType = 6;//统计类型:0:纯净数据统计(用户中心未升级兼容) 1:所有混合的数据统计 2:纯净数据统计
+    string loginUserId = 7;//登录用户userId，后期要从session中获取不应该直接传
+}
+message TeacherAccessOverviewReq{
+    int64 customerId = 1;
+    int32 statisticType = 2;//统计类型:1:所有混合的数据统计 2:纯净数据统计
+}
+message TeacherAccessTrendReq {
+    int32 type = 1; //1-新增教师 2-活跃教师 3-累积教师 4-平均单次使用时长 5-平均日使用时长 6-新增教师次周留存率 7-活跃教师构成 8-DAU/近7日活跃教师 9-DAU/近30日活跃教师
+    int32 dimension = 2; //维度  1-日 2-周 3-月
+    int64 customerId = 3; //客户id
+    int32 statisticType = 4;//统计类型:0:纯净数据统计(用户中心未升级兼容) 1:所有混合的数据统计 2:纯净数据统计
+}
+
+message UserBehaviorTrendReq {
+    int32 pageNo = 1;//当前页
+    int32 pageSize = 2;//每页数量
+    int32 cityId = 3; //城市id
+    int64 customerId = 4; //客户id
+    string userId = 5; //用户id
+    int32 behaviorEnd = 6; //行为端
+    int32 behaviorType = 7; //行为类型
+    int32 subjectId = 8; //科目
+    int32 gradeId = 9; //年级
+    string classId = 10; //班级
+    string startDate = 11; //开始日期
+    string endDate = 12; //结束日期
+    int32 statisticType = 13;//统计类型:0:纯净数据统计(用户中心未升级兼容) 1:所有混合的数据统计 2:纯净数据统计
+    string sortField = 14;//排序字段
+    string sortType = 15;//排序 升序：asc 降序：desc
+}
+
+message UserClickTimesReq {
+    string startDate = 1; //开始日期
+    string endDate = 2; //结束日期
+    int64 customerId = 3; //客户id
+    string userId = 4; //用户id
+    int32 behaviorEnd = 5; //行为终端 1-备授课端 2-家长APP 3-教师APP
+    int32 statisticType = 6;//统计类型:0:纯净数据统计(用户中心未升级兼容) 1:所有混合的数据统计 2:纯净数据统计
+    string sortField = 7;//排序字段
+    string sortType = 8;//排序 升序：asc 降序：desc
+}
+
+message CustomerStatisticResp {
+    string code = 1; //操作标识（0成功 1失败）
+    string msg = 2; //结果信息
+    int32 teachingCount = 3; //有效授课数
+    int32 classCount = 4; //班级数
+    int32 activateClassCount = 5; //激活班级数
+    int32 teacherCount = 6; //老师数
+    int32 activateTeacherCount = 7; //激活老师数
+    int32 studentCount = 8; //学生数
+    int32 activateStudentCount = 9; //激活小U学生数
+    int32 parentCount = 10; //家长数
+    int32 bindParentCount = 11; //绑定家长数
+    int32 viewReportCount = 12; //查看学情报告家长数
+    int32 schoolCount = 13;//学校总数
+    int32 activateSchoolCount = 14;//使用学校总数
+    int32 totalBindParentCount = 15;//家长总数
+    int64 totalCurrency = 16;//U币数
+    int32 loginTeacherCount = 17;//活跃教师数
+    int32 loginParentCount = 18;//活跃家长数
+    int32 loginStudentCount = 19;//活跃学生数
+    int32 lessonCount = 20;//授课次数
+    int32 loginParentAppCount = 21;//活跃家长数app
+    int32 loginParentH5Count = 22;//活跃家长数h5
+    int32 loginParentWxSubCount = 23;//活跃家长数公众号
+    int32 viewAppReportCount = 24;//查看学情报告家长数(app)
+    int32 viewBankReportCount = 25;//查看学情报告家长数(银行H5)
+    int32 disabledSchoolCount = 26;//停用学校数
+}
+
+message TeacherAccessOverviewResp {
+    string code = 1; //操作标识（0成功 1失败）
+    string msg = 2; //结果信息
+    int32 newTeacherSevenAverage = 3; //新增教师（7日平均）
+    int32 activeTeacherSevenAverage = 4; //活跃教师（7日平均）
+    int32 activeTeacherSevenTotal = 5; //近7日总活跃教师数
+    int32 activeTeacherThirtyTotal = 6; //近30日总活跃教师数
+    int32 teacherTotal = 7; //累积教师数
+    string nextWeekStayRate = 8; //新用户次周留存率
+    string useTimeSevenAverage = 9; //使用时长（7日平均）
+    int32 loginPerSeven = 10; //近7日登录次数（每教师平均）
+}
+
+message TeacherAccessTrendResp {
+    string code = 1; //操作标识（0成功 1失败）
+    string msg = 2; //结果信息
+    repeated string xaxis = 3; //x轴
+    repeated string series = 4; //数据
+}
+
+message TeacherAccessTrendDataResp {
+    string code = 1; //操作标识（0成功 1失败）
+    string msg = 2; //结果信息
+    repeated TeacherAccessTrend data = 3;
+}
+
+message TeacherAccessTrend {
+    string reportDate = 1; //日期
+    int32 newTeacher = 2; //新增教师
+    int32 activeTeacher = 3; //活跃教师
+    int32 teacherTotal = 4; //累积教师数
+    string useTimeAverage = 5; //平均单次使用时长
+    string useTimeDayAverage = 6; //平均日使用时长
+    string nextWeekStayRate = 7; //新增教师次周留存率
+    string activeTeacherRate = 8; //活跃教师构成
+    int32 activeTeacherSevenTotal = 9; //近7日活跃教师
+    int32 activeTeacherThirtyTotal = 10; //近30日活跃教师
+}
+
+message UserBehaviorTrendResp {
+    //操作标识（0成功 1失败）
+    string code = 1;
+    //结果信息
+    string msg = 2;
+    //当前页
+    int32 pageNo = 3;
+    //每页数量
+    int32 pageSize = 4;
+    //总页数
+    int32 pages = 5;
+    //总记录数
+    int64 total = 6;
+    //数据
+    repeated UserBehaviorTrend data = 7;
+}
+
+message UserBehaviorTrend {
+    string userName = 1; //姓名
+    string roleName = 2; //角色
+    string phoneNo = 3; //手机号
+    string customerName = 4; //学校
+    string districtName = 5; //区县
+    string cityName = 6; //城市
+    string provenceName = 7; //省份
+    string subjectName = 8; //科目
+    string className = 9; //班级全名
+    string firstLoginTime = 10; //班级全名
+    string behaviorEndName = 11; //行为端
+    string behaviorTypeName = 12; //行为类型
+    int32 clickTimes = 13; //点击次数
+}
+
+message UserClickTimesResp {
+    string code = 1; //操作标识（0成功 1失败）
+    string msg = 2; //结果信息
+    repeated UserClickTimes data = 3;//数据
+}
+message UserClickTimes{
+    string behaviorTypeName = 1;//行为类型名称
+    int32 clickTimes = 2; //点击次数
+}
